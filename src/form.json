@@ -1,0 +1,45 @@
+{
+  "key": "patient_registration",
+  "name": "Rejestracja pacjenta",
+  "description": "Formularz rejestracji pacjenta (JSON kompatybilny z dynamic-form-json)",
+  "version": 1,
+  "fields": [
+    {
+      "id": "patient_id",
+      "label": "Id pacjenta",
+      "placeholder": "NP. P-001",
+      "type": "text",
+      "validationType": "string",
+      "value": "",
+      "validations": [
+        { "type": "required", "params": ["Id pacjenta jest wymagane"] },
+        { "type": "min", "params": [3, "Id jest za krótkie"] }
+      ],
+      "layout": { "row": 1, "col": 1 }
+    },
+    {
+      "id": "age",
+      "label": "Wiek",
+      "placeholder": "Wiek w latach",
+      "type": "number",
+      "validationType": "number",
+      "value": "",
+      "validations": [
+        { "type": "required", "params": ["Wiek jest wymagany"] },
+        { "type": "min", "params": [0, "Wiek nie może być ujemny"] },
+        { "type": "max", "params": [120, "Podejrzanie wysoki wiek"] }
+      ],
+      "layout": { "row": 1, "col": 2 }
+    },
+    {
+      "id": "notes",
+      "label": "Uwagi",
+      "placeholder": "Dodatkowe informacje",
+      "type": "textarea",
+      "validationType": "string",
+      "value": "",
+      "validations": [],
+      "layout": { "row": 2, "col": 1, "colspan": 2 }
+    }
+  ]
+}
