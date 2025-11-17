@@ -1,45 +1,113 @@
 {
-  "key": "patient_registration",
-  "name": "Rejestracja pacjenta",
-  "description": "Formularz rejestracji pacjenta (JSON kompatybilny z dynamic-form-json)",
-  "version": 1,
+  "key": "project_registration",                 
+  "name": "Rejestracja projektu badawczego",     
+  "description": "Formularz tworzenia projektu (tabela 'Projekt' w Systemie Zarządzania Eksperymentami Naukowymi).",
+  "category": "Projekt",                         
+  "version": 1,                                  
+  "isActive": true,                              
   "fields": [
     {
-      "id": "patient_id",
-      "label": "Id pacjenta",
-      "placeholder": "NP. P-001",
+      "id": "project_name",
+      "label": "Nazwa projektu ",
+      "placeholder": "np. Analiza wpływu temperatury na wynik eksperymentu",
       "type": "text",
       "validationType": "string",
       "value": "",
       "validations": [
-        { "type": "required", "params": ["Id pacjenta jest wymagane"] },
-        { "type": "min", "params": [3, "Id jest za krótkie"] }
+        { "type": "required", "params": ["Nazwa projektu jest wymagana"] },
+        { "type": "min", "params": [5, "Nazwa jest za krótka"] }
       ],
-      "layout": { "row": 1, "col": 1 }
+      "layout": { "row": 1, "col": 1, "colspan": 2 },
+      "dbField": "Projekt.nazwa"                
     },
     {
-      "id": "age",
-      "label": "Wiek",
-      "placeholder": "Wiek w latach",
-      "type": "number",
-      "validationType": "number",
-      "value": "",
-      "validations": [
-        { "type": "required", "params": ["Wiek jest wymagany"] },
-        { "type": "min", "params": [0, "Wiek nie może być ujemny"] },
-        { "type": "max", "params": [120, "Podejrzanie wysoki wiek"] }
-      ],
-      "layout": { "row": 1, "col": 2 }
-    },
-    {
-      "id": "notes",
-      "label": "Uwagi",
-      "placeholder": "Dodatkowe informacje",
+      "id": "project_description",
+      "label": "Opis projektu ",
+      "placeholder": "Krótki opis celu, zakresu i metod projektu",
       "type": "textarea",
       "validationType": "string",
       "value": "",
       "validations": [],
-      "layout": { "row": 2, "col": 1, "colspan": 2 }
+      "layout": { "row": 2, "col": 1, "colspan": 2 },
+      "dbField": "Projekt.opis"
+    },
+    {
+      "id": "institution",
+      "label": "Instytucja ",
+      "placeholder": "np. Uniwersytet X",
+      "type": "text",
+      "validationType": "string",
+      "value": "",
+      "validations": [
+        { "type": "required", "params": ["Instytucja jest wymagana"] }
+      ],
+      "layout": { "row": 3, "col": 1 },
+      "dbField": "Projekt.instytucja"
+    },
+    {
+      "id": "unit",
+      "label": "Jednostka / wydział ",
+      "placeholder": "np. Katedra Chemii Fizycznej",
+      "type": "text",
+      "validationType": "string",
+      "value": "",
+      "validations": [],
+      "layout": { "row": 3, "col": 2 },
+      "dbField": "Projekt.jednostka"
+    },
+    {
+      "id": "principal_investigator",
+      "label": "Kierownik projektu ",
+      "placeholder": "Imię i nazwisko kierownika projektu",
+      "type": "text",
+      "validationType": "string",
+      "value": "",
+      "validations": [
+        { "type": "required", "params": ["Kierownik projektu jest wymagany"] }
+      ],
+      "layout": { "row": 4, "col": 1 },
+      "dbField": "Projekt.kierownik"
+    },
+    {
+      "id": "owner_id",
+      "label": "Id właściciela (użytkownikID) ",
+      "placeholder": "np. U-001",
+      "type": "text",                    
+      "validationType": "string",
+      "value": "",
+      "validations": [
+        { "type": "required", "params": ["Właściciel projektu jest wymagany"] }
+      ],
+      "layout": { "row": 4, "col": 2 },
+      "dbField": "Projekt.właścicielID"
+    },
+    {
+      "id": "status",
+      "label": "Status projektu ",
+      "placeholder": "",
+      "type": "select",
+      "options": [
+        { "label": "Aktywny", "value": "aktywny" },
+        { "label": "Archiwum", "value": "archiwum" }
+      ],
+      "validationType": "string",
+      "value": "aktywny",
+      "validations": [
+        { "type": "required", "params": ["Status projektu jest wymagany"] }
+      ],
+      "layout": { "row": 5, "col": 1 },
+      "dbField": "Projekt.status"
+    },
+    {
+      "id": "metadata",
+      "label": "Metadane (JSON) ",
+      "placeholder": "{\"grant\": \"NCN-...\", \"słowa_kluczowe\": [\"mikroskopia\", \"nanocząstki\"]}",
+      "type": "textarea",
+      "validationType": "string",
+      "value": "",
+      "validations": [],
+      "layout": { "row": 6, "col": 1, "colspan": 2 },
+      "dbField": "Projekt.metadata"
     }
   ]
 }

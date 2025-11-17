@@ -1,20 +1,26 @@
 import React from "react";
-import DynamicForm from "dynamic-form-json";
 import formDefinition from "./form.json";
 
 function App() {
-  const { name, description } = formDefinition as any;
-
-  const handleSubmission = (values: any) => {
-    console.log("Values from form:", values);
-    alert("Dane przesłane (zobacz console.log w konsoli CodeSandbox)");
-    // tu docelowo: fetch(...) do backendu (FastAPI/Flask) z values
-  };
+  const { name, description, fields } = formDefinition as any;
 
   return (
     <div style={{ padding: "1rem", fontFamily: "sans-serif" }}>
       <h1>{name}</h1>
-      {description && <p>{description}</p>}
+      <p>{description}</p>
+
+      <form>
+        {fields.map((field: any, index: number) => (
+          <div key={index} style={{ marginBottom: "10px" }}>
+            <label>{field.label}</label>
+            <input
+              type={field.type === "number" ? "number" : "text"}
+              placeholder={field.placeholder || ""}
+              name={field.name}
+            />
+          </div>
+        ))}
+      </form>
     </div>
   );
 }
