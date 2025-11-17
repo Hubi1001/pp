@@ -1,113 +1,127 @@
 {
-  "key": "project_registration",                 
-  "name": "Rejestracja projektu badawczego",     
-  "description": "Formularz tworzenia projektu (tabela 'Projekt' w Systemie Zarządzania Eksperymentami Naukowymi).",
-  "category": "Projekt",                         
-  "version": 1,                                  
-  "isActive": true,                              
+  "key": "experiment_registration",
+  "name": "Rejestracja eksperymentu",
+  "description": "Formularz tworzenia eksperymentu (tabela 'Eksperyment').",
+  "entity": "Eksperyment",
+  "layout": {
+    "columns": 2
+  },
   "fields": [
     {
-      "id": "project_name",
-      "label": "Nazwa projektu ",
-      "placeholder": "np. Analiza wpływu temperatury na wynik eksperymentu",
+      "id": "project_id",
+      "label": "Projekt",
+      "placeholder": "ID projektu lub wybór z listy",
       "type": "text",
       "validationType": "string",
       "value": "",
-      "validations": [
-        { "type": "required", "params": ["Nazwa projektu jest wymagana"] },
-        { "type": "min", "params": [5, "Nazwa jest za krótka"] }
-      ],
-      "layout": { "row": 1, "col": 1, "colspan": 2 },
-      "dbField": "Projekt.nazwa"                
+      "row": 1,
+      "col": 1,
+      "colspan": 1,
+      "dbField": "Eksperyment.projektID",
+      "permissions": {
+        "read": ["admin", "moderator", "badacz"],
+        "write": ["admin", "moderator"]
+      }
     },
     {
-      "id": "project_description",
-      "label": "Opis projektu ",
-      "placeholder": "Krótki opis celu, zakresu i metod projektu",
+      "id": "name",
+      "label": "Nazwa eksperymentu",
+      "placeholder": "np. Wpływ temperatury na wynik reakcji",
+      "type": "text",
+      "validationType": "string",
+      "value": "",
+      "row": 1,
+      "col": 2,
+      "colspan": 1,
+      "dbField": "Eksperyment.nazwa",
+      "permissions": {
+        "read": ["admin", "moderator", "badacz", "viewer"],
+        "write": ["admin", "moderator"]
+      }
+    },
+    {
+      "id": "author_id",
+      "label": "Autor (uzytkownikID)",
+      "placeholder": "np. 1",
+      "type": "number",
+      "validationType": "number",
+      "value": "",
+      "row": 2,
+      "col": 1,
+      "colspan": 1,
+      "dbField": "Eksperyment.autorID",
+      "permissions": {
+        "read": ["admin", "moderator"],
+        "write": ["admin", "moderator"]
+      }
+    },
+    {
+      "id": "form_id",
+      "label": "Formularz pomiarowy",
+      "placeholder": "ID formularza obserwacji",
+      "type": "text",
+      "validationType": "string",
+      "value": "",
+      "row": 2,
+      "col": 2,
+      "colspan": 1,
+      "dbField": "Eksperyment.formularzID",
+      "permissions": {
+        "read": ["admin", "moderator"],
+        "write": ["admin", "moderator"]
+      }
+    },
+    {
+      "id": "description",
+      "label": "Opis eksperymentu",
+      "placeholder": "Krótki opis celu i przebiegu eksperymentu",
       "type": "textarea",
       "validationType": "string",
       "value": "",
-      "validations": [],
-      "layout": { "row": 2, "col": 1, "colspan": 2 },
-      "dbField": "Projekt.opis"
+      "row": 3,
+      "col": 1,
+      "colspan": 2,
+      "dbField": "Eksperyment.opis",
+      "permissions": {
+        "read": ["admin", "moderator", "badacz", "viewer"],
+        "write": ["admin", "moderator", "badacz"]
+      }
     },
     {
-      "id": "institution",
-      "label": "Instytucja ",
-      "placeholder": "np. Uniwersytet X",
-      "type": "text",
+      "id": "details",
+      "label": "Szczegóły (JSON)",
+      "placeholder": "{\"temp_start\": 20, \"temp_end\": 80}",
+      "type": "textarea",
       "validationType": "string",
       "value": "",
-      "validations": [
-        { "type": "required", "params": ["Instytucja jest wymagana"] }
-      ],
-      "layout": { "row": 3, "col": 1 },
-      "dbField": "Projekt.instytucja"
-    },
-    {
-      "id": "unit",
-      "label": "Jednostka / wydział ",
-      "placeholder": "np. Katedra Chemii Fizycznej",
-      "type": "text",
-      "validationType": "string",
-      "value": "",
-      "validations": [],
-      "layout": { "row": 3, "col": 2 },
-      "dbField": "Projekt.jednostka"
-    },
-    {
-      "id": "principal_investigator",
-      "label": "Kierownik projektu ",
-      "placeholder": "Imię i nazwisko kierownika projektu",
-      "type": "text",
-      "validationType": "string",
-      "value": "",
-      "validations": [
-        { "type": "required", "params": ["Kierownik projektu jest wymagany"] }
-      ],
-      "layout": { "row": 4, "col": 1 },
-      "dbField": "Projekt.kierownik"
-    },
-    {
-      "id": "owner_id",
-      "label": "Id właściciela (użytkownikID) ",
-      "placeholder": "np. U-001",
-      "type": "text",                    
-      "validationType": "string",
-      "value": "",
-      "validations": [
-        { "type": "required", "params": ["Właściciel projektu jest wymagany"] }
-      ],
-      "layout": { "row": 4, "col": 2 },
-      "dbField": "Projekt.właścicielID"
+      "row": 4,
+      "col": 1,
+      "colspan": 2,
+      "dbField": "Eksperyment.details",
+      "permissions": {
+        "read": ["admin", "moderator", "badacz"],
+        "write": ["admin", "moderator", "badacz"]
+      }
     },
     {
       "id": "status",
-      "label": "Status projektu ",
-      "placeholder": "",
+      "label": "Status",
       "type": "select",
       "options": [
-        { "label": "Aktywny", "value": "aktywny" },
-        { "label": "Archiwum", "value": "archiwum" }
+        { "label": "Nowy", "value": "new" },
+        { "label": "W toku", "value": "in_progress" },
+        { "label": "Zakończony", "value": "finished" }
       ],
       "validationType": "string",
-      "value": "aktywny",
-      "validations": [
-        { "type": "required", "params": ["Status projektu jest wymagany"] }
-      ],
-      "layout": { "row": 5, "col": 1 },
-      "dbField": "Projekt.status"
-    },
-    {
-      "id": "metadata",
-      "label": "Metadane (JSON) ",
-      "placeholder": "{\"grant\": \"NCN-...\", \"słowa_kluczowe\": [\"mikroskopia\", \"nanocząstki\"]}",
-      "type": "textarea",
-      "validationType": "string",
-      "value": "",
-      "validations": [],
-      "layout": { "row": 6, "col": 1, "colspan": 2 },
-      "dbField": "Projekt.metadata"
+      "value": "new",
+      "row": 5,
+      "col": 1,
+      "colspan": 1,
+      "dbField": "Eksperyment.status",
+      "permissions": {
+        "read": ["admin", "moderator", "badacz", "viewer"],
+        "write": ["admin", "moderator"]
+      }
     }
   ]
 }
