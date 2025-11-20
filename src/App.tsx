@@ -67,6 +67,10 @@ function App() {
   // Tryb widoku: 'editor' lub 'form'
   const [viewMode, setViewMode] = useState<"editor" | "form">("editor");
 
+  // Stan wysyłania do bazy
+  const [isSaving, setIsSaving] = useState<boolean>(false);
+  const [saveMessage, setSaveMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
+
   const handleTemplateChange = (templateKey: keyof typeof TEMPLATES) => {
     const template = TEMPLATES[templateKey];
     setSelectedTemplate(templateKey);
@@ -123,6 +127,63 @@ function App() {
 
   const handleFormDataChange = (data: any) => {
     setFormData(data);
+  };
+
+  const handleSaveToDatabase = async () => {
+    setIsSaving(true);
+    setSaveMessage(null);
+
+    try {
+      // Określ endpoint na podstawie wybranego szablonu
+      let endpoint = "http://localhost:3001/api/forms/submit";
+      let payload: any = {
+        formType: selectedTemplate,
+        data: formData,
+        schema: currentConfig.schema,
+      };
+
+      // Użyj dedykowanych endpointów dla konkretnych formularzy
+      if (selectedTemplate === "experiment") {
+        endpoint = "http://localhost:3001/api/experiments";
+        payload = formData;
+      } else if (selectedTemplate === "experimentExtended") {
+        endpoint = "http://localhost:3001/api/experiments/extended";
+        payload = formData;
+      } else if (selectedTemplate === "person") {
+        endpoint = "http://localhost:3001/api/persons";
+        payload = formData;
+      }
+
+      const response = await fetch(endpoint, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      const result = await response.json();
+
+      if (response.ok && result.success) {
+        setSaveMessage({
+          type: "success",
+          text: `✅ ${result.message || "Dane zostały zapisane do bazy danych"}`,
+        });
+      } else {
+        setSaveMessage({
+          type: "error",
+          text: `❌ ${result.message || "Błąd zapisu do bazy danych"}`,
+        });
+      }
+    } catch (error) {
+      console.error("Błąd połączenia z serwerem:", error);
+      setSaveMessage({
+        type: "error",
+        text: "❌ Nie można połączyć się z serwerem. Upewnij się, że backend działa na porcie 3001.",
+      });
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
@@ -289,8 +350,42 @@ function App() {
           <div style={{ marginTop: "2rem" }}>
             <h3>Dane formularza (JSON)</h3>
             <div style={{ marginBottom: "0.5rem", fontSize: "14px", color: "#666" }}>
-              Te dane możesz wysłać do API lub zapisać w bazie danych
+              Te dane możesz wysłać do bazy danych PostgreSQL
             </div>
+            
+            {saveMessage && (
+              <div
+                style={{
+                  padding: "1rem",
+                  marginBottom: "1rem",
+                  borderRadius: "6px",
+                  background: saveMessage.type === "success" ? "#d4edda" : "#f8d7da",
+                  color: saveMessage.type === "success" ? "#155724" : "#721c24",
+                  border: `1px solid ${saveMessage.type === "success" ? "#c3e6cb" : "#f5c6cb"}`,
+                }}
+              >
+                {saveMessage.text}
+              </div>
+            )}
+
+            <button
+              onClick={handleSaveToDatabase}
+              disabled={isSaving}
+              style={{
+                padding: "0.75rem 2rem",
+                background: isSaving ? "#ccc" : "#28a745",
+                color: "white",
+                border: "none",
+                borderRadius: "6px",
+                cursor: isSaving ? "not-allowed" : "pointer",
+                fontSize: "16px",
+                fontWeight: "bold",
+                marginBottom: "1rem",
+              }}
+            >
+              {isSaving ? "Zapisywanie..." : "💾 Zapisz do bazy danych"}
+            </button>
+
             <pre
               style={{
                 background: "#f5f5f5",

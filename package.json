@@ -17,12 +17,16 @@
     "@mui/icons-material": "^7.3.5",
     "@mui/material": "^7.3.5",
     "@mui/x-date-pickers": "^8.19.0",
+    "cors": "^2.8.5",
     "dayjs": "^1.11.19",
+    "dotenv": "^17.2.3",
     "dynamic-form-json": "latest",
+    "express": "^5.1.0",
     "formik": "latest",
     "prop-types": "15.8.1",
     "react": "18.2.0",
     "react-dom": "18.2.0",
+    "sql.js": "^1.13.0",
     "styled-components": "latest",
     "yup": "latest"
   },
@@ -30,13 +34,16 @@
     "@types/react": "18.2.38",
     "@types/react-dom": "18.2.15",
     "@vitejs/plugin-react": "^4.2.1",
+    "concurrently": "^9.2.1",
     "typescript": "4.4.4",
     "vite": "^5.0.11"
   },
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "server": "node server/index.js",
+    "dev:all": "concurrently \"npm run dev\" \"npm run server\""
   },
   "browserslist": [
     ">0.2%",

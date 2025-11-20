@@ -1,0 +1,19 @@
+FROM node:18-alpine
+
+WORKDIR /app
+
+# Kopiuj package.json i package-lock.json
+COPY package*.json ./
+
+# Instaluj zależności
+RUN npm install --legacy-peer-deps
+
+# Kopiuj kod backendu
+COPY server ./server
+COPY .env.example .env
+
+# Eksponuj port
+EXPOSE 3001
+
+# Uruchom serwer
+CMD ["node", "server/index.js"]

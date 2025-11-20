@@ -2,7 +2,11 @@
 
 Aplikacja do generowania dynamicznych formularzy na podstawie JSON Schema, wykorzystująca bibliotekę [JSON Forms](https://jsonforms.io/).
 
+> **⚡ Nowy użytkownik?** Zobacz [SZYBKI_START.md](./SZYBKI_START.md) - uruchomisz projekt w 5 minut!
+
 ## 🚀 Szybki start
+
+### Tylko frontend (bez bazy danych)
 
 ```bash
 npm install
@@ -10,6 +14,25 @@ npm run dev
 ```
 
 Aplikacja będzie dostępna na: **http://localhost:5173/**
+
+### Frontend + Backend + PostgreSQL
+
+1. **Zainstaluj PostgreSQL** i utwórz bazę danych `formularze_db`
+2. **Wykonaj schemat bazy:**
+   ```bash
+   psql -U postgres -d formularze_db -f database/schema.sql
+   ```
+3. **Skonfiguruj połączenie** - skopiuj `.env.example` do `.env` i uzupełnij dane
+4. **Uruchom wszystko:**
+   ```bash
+   npm install
+   npm run dev:all
+   ```
+
+Frontend: **http://localhost:5173/**  
+Backend API: **http://localhost:3001/api**
+
+Szczegółowa instrukcja: [BACKEND_INSTRUKCJA.md](./BACKEND_INSTRUKCJA.md)
 
 ## 📝 Opis projektu
 
@@ -20,6 +43,8 @@ Generator formularzy oparty na standardzie JSON Schema, umożliwiający tworzeni
 - ✅ 3 gotowe szablony (w tym formularze eksperymentów)
 - ✅ Edytor schematu w czasie rzeczywistym
 - ✅ Automatyczna walidacja pól
+- ✅ **Zapisywanie danych do PostgreSQL**
+- ✅ Backend API (Express.js + Node.js)
 - ✅ Podgląd danych w formacie JSON
 - ✅ Material Design UI
 - ✅ Pełna responsywność
@@ -32,15 +57,26 @@ Generator formularzy oparty na standardzie JSON Schema, umożliwiający tworzeni
 
 ## 📖 Dokumentacja
 
+- **[SZYBKI_START.md](./SZYBKI_START.md)** - ⚡ Uruchom projekt w 5 minut (START TUTAJ!)
+- [BACKEND_INSTRUKCJA.md](./BACKEND_INSTRUKCJA.md) - Szczegółowa instrukcja backendu i PostgreSQL
+- [API_DOCUMENTATION.md](./API_DOCUMENTATION.md) - Dokumentacja REST API (endpointy, przykłady)
 - [README_JSONFORMS.md](./README_JSONFORMS.md) - Pełna dokumentacja JSON Forms, przykłady typów pól
+- [PRZYKLADY_SCHEMATOW.md](./PRZYKLADY_SCHEMATOW.md) - Gotowe przykłady schematów do wklejenia
 - [PRZEWODNIK_KONWERSJI.md](./PRZEWODNIK_KONWERSJI.md) - Konwersja z oryginalnego formatu na JSON Schema
 
 ## 🛠️ Technologie
 
+### Frontend
 - **React 18** + TypeScript
 - **JSON Forms** - generator formularzy
 - **Material-UI** - komponenty UI
 - **Vite** - build tool
+
+### Backend
+- **Node.js** + Express.js
+- **PostgreSQL** - baza danych
+- **node-postgres (pg)** - driver PostgreSQL
+- **CORS** - obsługa cross-origin requests
 
 ## 📦 Struktura projektu
 
@@ -52,6 +88,16 @@ src/
 ├── person-schema-simple.json        # Szablon osoby (prosty)
 ├── form.json                        # Oryginalny format (referencyjny)
 └── styles.css                       # Style aplikacji
+
+server/
+├── index.js                         # Serwer Express.js
+└── db.js                            # Konfiguracja PostgreSQL
+
+database/
+└── schema.sql                       # Schemat bazy danych
+
+.env                                 # Konfiguracja (nie commitować!)
+.env.example                         # Przykład konfiguracji
 ```
 
 ## 💡 Jak używać
@@ -67,6 +113,18 @@ Kliknij "Wygeneruj formularz" aby zobaczyć rezultat.
 
 ### 4. Wypełnij formularz
 Przejdź do zakładki "Formularz" i wypełnij pola. Dane w formacie JSON pojawią się na dole.
+
+### 5. Zapisz do bazy danych
+Kliknij przycisk **"💾 Zapisz do bazy danych"** aby zapisać dane w PostgreSQL.
+
+### 6. Sprawdź dane w bazie
+```sql
+-- Otwórz psql
+psql -U postgres -d formularze_db
+
+-- Zobacz ostatnie eksperymenty
+SELECT * FROM eksperymenty ORDER BY created_at DESC LIMIT 5;
+```
 
 ## 🔗 Przydatne linki
 
