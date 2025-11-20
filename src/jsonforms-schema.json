@@ -1,0 +1,104 @@
+{
+  "schema": {
+    "type": "object",
+    "title": "Rejestracja eksperymentu",
+    "description": "Formularz tworzenia eksperymentu (tabela 'Eksperyment')",
+    "properties": {
+      "project_id": {
+        "type": "string",
+        "title": "Projekt",
+        "description": "ID projektu lub wybór z listy"
+      },
+      "name": {
+        "type": "string",
+        "title": "Nazwa eksperymentu",
+        "description": "np. Wpływ temperatury na wynik reakcji"
+      },
+      "author_id": {
+        "type": "integer",
+        "title": "Autor (uzytkownikID)",
+        "description": "np. 1"
+      },
+      "form_id": {
+        "type": "string",
+        "title": "Formularz pomiarowy",
+        "description": "ID formularza obserwacji"
+      },
+      "description": {
+        "type": "string",
+        "title": "Opis eksperymentu",
+        "description": "Krótki opis celu i przebiegu eksperymentu"
+      },
+      "details": {
+        "type": "string",
+        "title": "Szczegóły (JSON)",
+        "description": "{\"temp_start\": 20, \"temp_end\": 80}"
+      },
+      "status": {
+        "type": "string",
+        "title": "Status",
+        "enum": ["new", "in_progress", "finished"],
+        "default": "new"
+      }
+    },
+    "required": ["project_id", "name"]
+  },
+  "uischema": {
+    "type": "VerticalLayout",
+    "elements": [
+      {
+        "type": "HorizontalLayout",
+        "elements": [
+          {
+            "type": "Control",
+            "scope": "#/properties/project_id"
+          },
+          {
+            "type": "Control",
+            "scope": "#/properties/name"
+          }
+        ]
+      },
+      {
+        "type": "HorizontalLayout",
+        "elements": [
+          {
+            "type": "Control",
+            "scope": "#/properties/author_id"
+          },
+          {
+            "type": "Control",
+            "scope": "#/properties/form_id"
+          }
+        ]
+      },
+      {
+        "type": "Control",
+        "scope": "#/properties/description",
+        "options": {
+          "multi": true
+        }
+      },
+      {
+        "type": "Control",
+        "scope": "#/properties/details",
+        "options": {
+          "multi": true
+        }
+      },
+      {
+        "type": "Control",
+        "scope": "#/properties/status"
+      }
+    ]
+  },
+  "data": {
+    "project_id": "",
+    "name": "",
+    "author_id": null,
+    "form_id": "",
+    "description": "",
+    "details": "",
+    "status": "new"
+  }
+}

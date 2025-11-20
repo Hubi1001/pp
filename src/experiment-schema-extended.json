@@ -1,0 +1,263 @@
+{
+  "schema": {
+    "type": "object",
+    "title": "Rejestracja eksperymentu - rozszerzony",
+    "description": "Formularz tworzenia eksperymentu z dodatkowymi polami",
+    "properties": {
+      "project_id": {
+        "type": "string",
+        "title": "Projekt",
+        "description": "ID projektu lub wybór z listy"
+      },
+      "name": {
+        "type": "string",
+        "title": "Nazwa eksperymentu",
+        "description": "np. Wpływ temperatury na wynik reakcji",
+        "minLength": 5
+      },
+      "author_id": {
+        "type": "integer",
+        "title": "Autor (ID użytkownika)",
+        "description": "np. 1",
+        "minimum": 1
+      },
+      "form_id": {
+        "type": "string",
+        "title": "Formularz pomiarowy",
+        "description": "ID formularza obserwacji"
+      },
+      "description": {
+        "type": "string",
+        "title": "Opis eksperymentu",
+        "description": "Krótki opis celu i przebiegu eksperymentu"
+      },
+      "details": {
+        "type": "string",
+        "title": "Szczegóły (JSON)",
+        "description": "Dane w formacie JSON, np. parametry eksperymentu"
+      },
+      "status": {
+        "type": "string",
+        "title": "Status",
+        "enum": ["new", "in_progress", "finished"],
+        "default": "new"
+      },
+      "start_date": {
+        "type": "string",
+        "format": "date",
+        "title": "Data rozpoczęcia",
+        "description": "Planowana data rozpoczęcia eksperymentu"
+      },
+      "end_date": {
+        "type": "string",
+        "format": "date",
+        "title": "Data zakończenia",
+        "description": "Planowana data zakończenia eksperymentu"
+      },
+      "priority": {
+        "type": "string",
+        "title": "Priorytet",
+        "enum": ["Niski", "Średni", "Wysoki", "Krytyczny"],
+        "default": "Średni"
+      },
+      "budget": {
+        "type": "number",
+        "title": "Budżet (PLN)",
+        "description": "Przewidywany budżet eksperymentu",
+        "minimum": 0
+      },
+      "team_members": {
+        "type": "array",
+        "title": "Członkowie zespołu",
+        "items": {
+          "type": "object",
+          "properties": {
+            "user_id": {
+              "type": "integer",
+              "title": "ID użytkownika"
+            },
+            "role": {
+              "type": "string",
+              "title": "Rola",
+              "enum": ["Kierownik", "Badacz", "Asystent", "Obserwator"]
+            }
+          }
+        }
+      },
+      "tags": {
+        "type": "array",
+        "title": "Tagi",
+        "description": "Słowa kluczowe opisujące eksperyment",
+        "items": {
+          "type": "string"
+        }
+      },
+      "is_confidential": {
+        "type": "boolean",
+        "title": "Eksperyment poufny",
+        "default": false
+      },
+      "laboratory": {
+        "type": "object",
+        "title": "Laboratorium",
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Nazwa laboratorium"
+          },
+          "room_number": {
+            "type": "string",
+            "title": "Numer pokoju"
+          },
+          "equipment": {
+            "type": "string",
+            "title": "Wymagany sprzęt"
+          }
+        }
+      }
+    },
+    "required": ["project_id", "name", "author_id"]
+  },
+  "uischema": {
+    "type": "VerticalLayout",
+    "elements": [
+      {
+        "type": "Group",
+        "label": "Podstawowe informacje",
+        "elements": [
+          {
+            "type": "HorizontalLayout",
+            "elements": [
+              {
+                "type": "Control",
+                "scope": "#/properties/project_id"
+              },
+              {
+                "type": "Control",
+                "scope": "#/properties/name"
+              }
+            ]
+          },
+          {
+            "type": "HorizontalLayout",
+            "elements": [
+              {
+                "type": "Control",
+                "scope": "#/properties/author_id"
+              },
+              {
+                "type": "Control",
+                "scope": "#/properties/form_id"
+              }
+            ]
+          },
+          {
+            "type": "Control",
+            "scope": "#/properties/description",
+            "options": {
+              "multi": true
+            }
+          }
+        ]
+      },
+      {
+        "type": "Group",
+        "label": "Harmonogram i status",
+        "elements": [
+          {
+            "type": "HorizontalLayout",
+            "elements": [
+              {
+                "type": "Control",
+                "scope": "#/properties/status"
+              },
+              {
+                "type": "Control",
+                "scope": "#/properties/priority"
+              }
+            ]
+          },
+          {
+            "type": "HorizontalLayout",
+            "elements": [
+              {
+                "type": "Control",
+                "scope": "#/properties/start_date"
+              },
+              {
+                "type": "Control",
+                "scope": "#/properties/end_date"
+              }
+            ]
+          },
+          {
+            "type": "Control",
+            "scope": "#/properties/budget"
+          }
+        ]
+      },
+      {
+        "type": "Group",
+        "label": "Szczegóły techniczne",
+        "elements": [
+          {
+            "type": "Control",
+            "scope": "#/properties/details",
+            "options": {
+              "multi": true
+            }
+          },
+          {
+            "type": "Control",
+            "scope": "#/properties/tags"
+          },
+          {
+            "type": "Control",
+            "scope": "#/properties/is_confidential"
+          }
+        ]
+      },
+      {
+        "type": "Group",
+        "label": "Zespół",
+        "elements": [
+          {
+            "type": "Control",
+            "scope": "#/properties/team_members"
+          }
+        ]
+      },
+      {
+        "type": "Group",
+        "label": "Lokalizacja",
+        "elements": [
+          {
+            "type": "Control",
+            "scope": "#/properties/laboratory"
+          }
+        ]
+      }
+    ]
+  },
+  "data": {
+    "project_id": "",
+    "name": "",
+    "author_id": null,
+    "form_id": "",
+    "description": "",
+    "details": "",
+    "status": "new",
+    "start_date": "",
+    "end_date": "",
+    "priority": "Średni",
+    "budget": 0,
+    "team_members": [],
+    "tags": [],
+    "is_confidential": false,
+    "laboratory": {
+      "name": "",
+      "room_number": "",
+      "equipment": ""
+    }
+  }
+}

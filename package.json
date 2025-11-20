@@ -9,20 +9,29 @@
   ],
   "main": "src/index.tsx",
   "dependencies": {
-    "react": "18.2.0",
-    "react-dom": "18.2.0",
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.1",
+    "@jsonforms/core": "^3.6.0",
+    "@jsonforms/material-renderers": "^3.6.0",
+    "@jsonforms/react": "^3.6.0",
+    "@mui/icons-material": "^7.3.5",
+    "@mui/material": "^7.3.5",
+    "@mui/x-date-pickers": "^8.19.0",
+    "dayjs": "^1.11.19",
     "dynamic-form-json": "latest",
     "formik": "latest",
-    "yup": "latest",
+    "prop-types": "15.8.1",
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
     "styled-components": "latest",
-    "prop-types": "15.8.1"
+    "yup": "latest"
   },
   "devDependencies": {
     "@types/react": "18.2.38",
     "@types/react-dom": "18.2.15",
+    "@vitejs/plugin-react": "^4.2.1",
     "typescript": "4.4.4",
-    "vite": "^5.0.11",
-    "@vitejs/plugin-react": "^4.2.1"
+    "vite": "^5.0.11"
   },
   "scripts": {
     "dev": "vite",

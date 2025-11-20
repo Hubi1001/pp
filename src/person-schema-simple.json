@@ -1,0 +1,67 @@
+{
+  "schema": {
+    "type": "object",
+    "title": "Prosty formularz osoby",
+    "properties": {
+      "firstName": {
+        "type": "string",
+        "title": "Imię",
+        "minLength": 2
+      },
+      "lastName": {
+        "type": "string",
+        "title": "Nazwisko",
+        "minLength": 2
+      },
+      "age": {
+        "type": "integer",
+        "title": "Wiek",
+        "minimum": 0,
+        "maximum": 150
+      },
+      "email": {
+        "type": "string",
+        "format": "email",
+        "title": "Email"
+      }
+    },
+    "required": ["firstName", "lastName"]
+  },
+  "uischema": {
+    "type": "VerticalLayout",
+    "elements": [
+      {
+        "type": "HorizontalLayout",
+        "elements": [
+          {
+            "type": "Control",
+            "scope": "#/properties/firstName"
+          },
+          {
+            "type": "Control",
+            "scope": "#/properties/lastName"
+          }
+        ]
+      },
+      {
+        "type": "HorizontalLayout",
+        "elements": [
+          {
+            "type": "Control",
+            "scope": "#/properties/age"
+          },
+          {
+            "type": "Control",
+            "scope": "#/properties/email"
+          }
+        ]
+      }
+    ]
+  },
+  "data": {
+    "firstName": "",
+    "lastName": "",
+    "age": null,
+    "email": ""
+  }
+}
