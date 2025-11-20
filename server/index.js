@@ -9,10 +9,18 @@ const PORT = process.env.PORT || 3001;
 
 // Middleware
 app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+  origin: ['http://localhost:5173', 'http://localhost:5174'],
   credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
 }));
 app.use(express.json());
+
+// Middleware do logowania żądań
+app.use((req, res, next) => {
+  console.log(`📥 ${req.method} ${req.url} - Origin: ${req.get('origin')}`);
+  next();
+});
 
 // Endpoint testowy
 app.get('/api/health', (req, res) => {
@@ -25,6 +33,7 @@ app.get('/api/health', (req, res) => {
 
 // Endpoint do zapisywania eksperymentu (podstawowy)
 app.post('/api/experiments', async (req, res) => {
+  console.log('🔵 POST /api/experiments - Body:', JSON.stringify(req.body, null, 2));
   const { project_id, name, author_id, form_id, description, details, status } = req.body;
 
   try {
@@ -38,13 +47,15 @@ app.post('/api/experiments', async (req, res) => {
     // Pobierz zapisany rekord
     const inserted = query('SELECT * FROM eksperymenty WHERE id = ?', [result.insertId]);
 
+    console.log('✅ Eksperyment zapisany:', inserted.rows[0]);
+
     res.status(201).json({
       success: true,
       message: 'Eksperyment został zapisany',
       data: inserted.rows[0],
     });
   } catch (error) {
-    console.error('Błąd zapisu eksperymentu:', error);
+    console.error('❌ Błąd zapisu eksperymentu:', error);
     res.status(500).json({
       success: false,
       message: 'Błąd zapisu do bazy danych',
