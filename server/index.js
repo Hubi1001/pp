@@ -3,9 +3,11 @@ const cors = require('cors');
 require('dotenv').config();
 
 const { initDatabase, query, run, testConnection } = require('./db');
+const { initMongoDB, insertDocument, findDocuments } = require('./mongodb');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
+const USE_MONGODB = process.env.USE_MONGODB === 'true';
 
 // Middleware
 app.use(cors({
@@ -27,9 +29,84 @@ app.get('/api/health', (req, res) => {
   res.json({ 
     status: 'OK', 
     message: 'Backend działa poprawnie',
+    database: USE_MONGODB ? 'MongoDB' : 'SQLite',
     timestamp: new Date().toISOString() 
   });
 });
+
+// ==================== MONGODB ENDPOINTS ====================
+
+// Endpoint do zapisywania do MongoDB (uniwersalny)
+app.post('/api/mongodb/save', async (req, res) => {
+  if (!USE_MONGODB) {
+    return res.status(400).json({
+      success: false,
+      message: 'MongoDB nie jest włączony. Ustaw USE_MONGODB=true w pliku .env'
+    });
+  }
+
+  console.log('🔵 POST /api/mongodb/save - Body:', JSON.stringify(req.body, null, 2));
+  const { collection, data } = req.body;
+
+  if (!collection || !data) {
+    return res.status(400).json({
+      success: false,
+      message: 'Wymagane pola: collection, data'
+    });
+  }
+
+  try {
+    const result = await insertDocument(collection, data);
+    
+    res.status(201).json({
+      success: true,
+      message: `Dokument zapisany w kolekcji ${collection}`,
+      data: {
+        insertedId: result.insertedId,
+        document: result.document
+      }
+    });
+  } catch (error) {
+    console.error('❌ Błąd zapisu do MongoDB:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Błąd zapisu do MongoDB',
+      error: error.message
+    });
+  }
+});
+
+// Endpoint do pobierania danych z MongoDB
+app.get('/api/mongodb/:collection', async (req, res) => {
+  if (!USE_MONGODB) {
+    return res.status(400).json({
+      success: false,
+      message: 'MongoDB nie jest włączony'
+    });
+  }
+
+  const { collection } = req.params;
+
+  try {
+    const documents = await findDocuments(collection);
+    
+    res.json({
+      success: true,
+      collection,
+      count: documents.length,
+      data: documents
+    });
+  } catch (error) {
+    console.error('❌ Błąd odczytu z MongoDB:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Błąd odczytu z MongoDB',
+      error: error.message
+    });
+  }
+});
+
+// ==================== SQLITE ENDPOINTS ====================
 
 // Endpoint do zapisywania eksperymentu (podstawowy)
 app.post('/api/experiments', async (req, res) => {
@@ -267,6 +344,42 @@ app.get('/api/forms/submissions', async (req, res) => {
   }
 });
 
+// ==================== ADMIN ENDPOINTS ====================
+
+// Endpoint do przeglądania wszystkich danych (admin panel)
+app.get('/api/admin/all-data', async (req, res) => {
+  try {
+    const tables = ['eksperymenty', 'eksperymenty_extended', 'osoby', 'form_submissions'];
+    const allData = {};
+    
+    for (const table of tables) {
+      try {
+        const result = query(`SELECT * FROM ${table} ORDER BY created_at DESC`, []);
+        allData[table] = {
+          count: result.rows.length,
+          data: result.rows
+        };
+      } catch (error) {
+        allData[table] = { count: 0, data: [], error: error.message };
+      }
+    }
+    
+    res.json({
+      success: true,
+      database: USE_MONGODB ? 'MongoDB' : 'SQLite',
+      timestamp: new Date().toISOString(),
+      tables: allData
+    });
+  } catch (error) {
+    console.error('Błąd pobierania danych:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Błąd pobierania danych',
+      error: error.message
+    });
+  }
+});
+
 // Obsługa nieistniejących endpointów
 app.use((req, res) => {
   res.status(404).json({
@@ -280,16 +393,26 @@ const startServer = async () => {
   try {
     console.log('🔄 Inicjalizacja serwera...');
     
-    // Inicjalizacja bazy danych SQLite
-    await initDatabase();
-    console.log('✅ Baza danych zainicjalizowana');
-    
-    // Test połączenia z bazą danych
-    const dbConnected = await testConnection();
+    // Inicjalizacja bazy danych
+    if (USE_MONGODB) {
+      const mongoConnected = await initMongoDB();
+      if (!mongoConnected) {
+        console.error('⚠️  MongoDB niedostępny. Przełączam na SQLite...');
+        process.env.USE_MONGODB = 'false';
+        await initDatabase();
+      }
+    } else {
+      // Inicjalizacja bazy danych SQLite
+      await initDatabase();
+      console.log('✅ Baza danych SQLite zainicjalizowana');
+      
+      // Test połączenia z bazą danych
+      const dbConnected = await testConnection();
 
-    if (!dbConnected) {
-      console.error('⚠️  Uwaga: Nie można połączyć się z bazą danych.');
-      console.error('⚠️  Serwer będzie działał, ale zapisy do bazy nie będą możliwe.');
+      if (!dbConnected) {
+        console.error('⚠️  Uwaga: Nie można połączyć się z bazą danych.');
+        console.error('⚠️  Serwer będzie działał, ale zapisy do bazy nie będą możliwe.');
+      }
     }
 
     const server = app.listen(PORT, () => {

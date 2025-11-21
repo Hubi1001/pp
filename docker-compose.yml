@@ -1,11 +1,29 @@
 version: '3.8'
 
 services:
-  # Baza danych PostgreSQL
+  # Baza danych MongoDB
+  mongodb:
+    image: mongo:7
+    container_name: formularze_mongodb
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_DATABASE: formularze_db
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Baza danych PostgreSQL (opcjonalnie)
   postgres:
     image: postgres:15-alpine
     container_name: formularze_postgres
     restart: unless-stopped
+    profiles: ["postgres"]  # Uruchom tylko gdy potrzebny
     environment:
       POSTGRES_DB: formularze_db
       POSTGRES_USER: postgres
@@ -21,31 +39,9 @@ services:
       timeout: 5s
       retries: 5
 
-  # Backend API
-  backend:
-    build:
-      context: .
-      dockerfile: Dockerfile.backend
-    container_name: formularze_backend
-    restart: unless-stopped
-    depends_on:
-      postgres:
-        condition: service_healthy
-    environment:
-      DB_HOST: postgres
-      DB_PORT: 5432
-      DB_USER: postgres
-      DB_PASSWORD: postgres
-      DB_NAME: formularze_db
-      PORT: 3001
-      FRONTEND_URL: http://localhost:5173
-    ports:
-      - "3001:3001"
-    volumes:
-      - ./server:/app/server
-      - ./node_modules:/app/node_modules
-
 volumes:
+  mongodb_data:
+    driver: local
   postgres_data:
     driver: local
 

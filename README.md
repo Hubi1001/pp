@@ -15,6 +15,32 @@ npm run dev
 
 Aplikacja będzie dostępna na: **http://localhost:5173/**
 
+### Frontend + Backend + MongoDB 🍃 (ZALECANE)
+
+```bash
+# 1. Uruchom MongoDB
+docker compose up -d mongodb
+
+# 2. Skonfiguruj .env
+echo "USE_MONGODB=true" > .env
+echo "MONGODB_URI=mongodb://localhost:27017" >> .env
+echo "MONGODB_DB_NAME=formularze_db" >> .env
+
+# 3. Uruchom aplikację
+npm run dev:all
+```
+
+📚 **Szczegóły:** [JAK_MONGODB.md](./JAK_MONGODB.md)
+
+### Frontend + Backend + SQLite (domyślne)
+
+```bash
+npm install
+npm run dev:all
+```
+
+Dane zapisywane są w `database/forms.db`
+
 ### Frontend + Backend + PostgreSQL
 
 1. **Zainstaluj PostgreSQL** i utwórz bazę danych `formularze_db`

@@ -134,25 +134,28 @@ function App() {
     setSaveMessage(null);
 
     try {
-      // Określ endpoint na podstawie wybranego szablonu
-      let endpoint = "http://localhost:3001/api/forms/submit";
-      let payload: any = {
-        formType: selectedTemplate,
-        data: formData,
-        schema: currentConfig.schema,
-      };
-
-      // Użyj dedykowanych endpointów dla konkretnych formularzy
+      // Zapisz do MongoDB (uniwersalny endpoint)
+      const endpoint = "http://localhost:3001/api/mongodb/save";
+      
+      // Określ nazwę kolekcji na podstawie szablonu
+      let collectionName = "form_submissions";
+      
       if (selectedTemplate === "experiment") {
-        endpoint = "http://localhost:3001/api/experiments";
-        payload = formData;
+        collectionName = "experiments";
       } else if (selectedTemplate === "experimentExtended") {
-        endpoint = "http://localhost:3001/api/experiments/extended";
-        payload = formData;
+        collectionName = "experiments_extended";
       } else if (selectedTemplate === "person") {
-        endpoint = "http://localhost:3001/api/persons";
-        payload = formData;
+        collectionName = "persons";
       }
+      
+      const payload = {
+        collection: collectionName,
+        data: {
+          formType: selectedTemplate,
+          ...formData,
+          schema: currentConfig.schema
+        }
+      };
 
       const response = await fetch(endpoint, {
         method: "POST",
