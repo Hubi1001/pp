@@ -133,13 +133,18 @@ function App() {
     setIsSaving(true);
     setSaveMessage(null);
 
+    // Bazowy URL API (ustawiany przez Vite: VITE_API_BASE), domyślnie pusty (relatywny)
+    // @ts-ignore: import.meta may not be typed in some TS configs, cast to any
+    const API_BASE = ((import.meta as any)?.env?.VITE_API_BASE as string) || "";
+
+    // Określ endpoint na podstawie konfiguracji (MongoDB endpoint)
+    const endpoint = `${API_BASE}/api/mongodb/save`;
+
     try {
-      // Zapisz do MongoDB (uniwersalny endpoint)
-      const endpoint = "http://localhost:3001/api/mongodb/save";
-      
+
       // Określ nazwę kolekcji na podstawie szablonu
       let collectionName = "form_submissions";
-      
+
       if (selectedTemplate === "experiment") {
         collectionName = "experiments";
       } else if (selectedTemplate === "experimentExtended") {
@@ -147,14 +152,14 @@ function App() {
       } else if (selectedTemplate === "person") {
         collectionName = "persons";
       }
-      
+
       const payload = {
         collection: collectionName,
         data: {
           formType: selectedTemplate,
           ...formData,
-          schema: currentConfig.schema
-        }
+          schema: currentConfig.schema,
+        },
       };
 
       const response = await fetch(endpoint, {
@@ -178,11 +183,12 @@ function App() {
           text: `❌ ${result.message || "Błąd zapisu do bazy danych"}`,
         });
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Błąd połączenia z serwerem:", error);
+      const errMsg = error && error.message ? error.message : String(error);
       setSaveMessage({
         type: "error",
-        text: "❌ Nie można połączyć się z serwerem. Upewnij się, że backend działa na porcie 3001.",
+        text: `❌ Nie można połączyć się z serwerem pod adresem ${endpoint}. Szczegóły: ${errMsg}`,
       });
     } finally {
       setIsSaving(false);

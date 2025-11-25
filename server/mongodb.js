@@ -6,6 +6,8 @@ const DB_NAME = process.env.MONGODB_DB_NAME || 'formularze_db';
 
 let client = null;
 let db = null;
+let useFallback = false;
+let inMemoryDB = {}; // Fallback in-memory storage
 
 /**
  * Inicjalizacja połączenia z MongoDB
@@ -15,7 +17,10 @@ async function initMongoDB() {
     console.log('🔄 Łączenie z MongoDB...');
     console.log(`📍 URI: ${MONGODB_URI}`);
     
-    client = new MongoClient(MONGODB_URI);
+    client = new MongoClient(MONGODB_URI, {
+      serverSelectionTimeoutMS: 3000, // 3 sekundy timeout
+      connectTimeoutMS: 3000
+    });
     await client.connect();
     
     db = client.db(DB_NAME);
@@ -29,10 +34,12 @@ async function initMongoDB() {
     return true;
   } catch (error) {
     console.error('❌ Błąd połączenia z MongoDB:', error.message);
-    console.log('💡 Upewnij się, że MongoDB jest uruchomiony:');
+    console.log('⚠️  Przełączam na tryb in-memory (bez persystencji)');
+    console.log('💡 Aby użyć prawdziwego MongoDB:');
+    console.log('   - MongoDB Atlas (darmowe): https://www.mongodb.com/cloud/atlas/register');
     console.log('   - Docker: docker run -d -p 27017:27017 --name mongodb mongo');
-    console.log('   - Lokalnie: mongod');
-    return false;
+    useFallback = true;
+    return true; // Zwróć true, aby aplikacja działała
   }
 }
 
@@ -40,6 +47,9 @@ async function initMongoDB() {
  * Pobiera referencję do bazy danych
  */
 function getDB() {
+  if (useFallback) {
+    return null; // Fallback mode
+  }
   if (!db) {
     throw new Error('Baza danych nie jest zainicjalizowana. Wywołaj najpierw initMongoDB()');
   }
@@ -58,8 +68,6 @@ function getCollection(collectionName) {
  */
 async function insertDocument(collectionName, document) {
   try {
-    const collection = getCollection(collectionName);
-    
     // Dodaj timestamp
     const docWithTimestamp = {
       ...document,
@@ -67,6 +75,24 @@ async function insertDocument(collectionName, document) {
       updatedAt: new Date()
     };
     
+    if (useFallback) {
+      // In-memory fallback
+      if (!inMemoryDB[collectionName]) {
+        inMemoryDB[collectionName] = [];
+      }
+      const id = Date.now() + Math.random();
+      docWithTimestamp._id = id;
+      inMemoryDB[collectionName].push(docWithTimestamp);
+      console.log(`✅ Zapisano dokument do ${collectionName} (in-memory), ID: ${id}`);
+      
+      return {
+        success: true,
+        insertedId: id,
+        document: docWithTimestamp
+      };
+    }
+    
+    const collection = getCollection(collectionName);
     const result = await collection.insertOne(docWithTimestamp);
     console.log(`✅ Zapisano dokument do ${collectionName}, ID: ${result.insertedId}`);
     
@@ -86,6 +112,11 @@ async function insertDocument(collectionName, document) {
  */
 async function findDocuments(collectionName, filter = {}, options = {}) {
   try {
+    if (useFallback) {
+      // In-memory fallback
+      return inMemoryDB[collectionName] || [];
+    }
+    
     const collection = getCollection(collectionName);
     const documents = await collection.find(filter, options).toArray();
     return documents;

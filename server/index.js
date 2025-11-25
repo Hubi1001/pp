@@ -10,8 +10,27 @@ const PORT = process.env.PORT || 3001;
 const USE_MONGODB = process.env.USE_MONGODB === 'true';
 
 // Middleware
+// CORS: development-friendly policy. In production set FRONTEND_URL env to restrict origin.
+const allowedLocalOrigins = ['http://localhost:5173', 'http://localhost:5174'];
+const frontendUrl = process.env.FRONTEND_URL;
+
 app.use(cors({
-  origin: ['http://localhost:5173', 'http://localhost:5174'],
+  origin: (origin, callback) => {
+    // Allow non-browser requests (curl, server-to-server)
+    if (!origin) return callback(null, true);
+
+    // If FRONTEND_URL explicitly set and matches, allow
+    if (frontendUrl && origin === frontendUrl) return callback(null, true);
+
+    // Allow localhost during development
+    if (allowedLocalOrigins.includes(origin)) return callback(null, true);
+
+    // If not in production, allow all origins to simplify testing in remote editors
+    if (process.env.NODE_ENV !== 'production') return callback(null, true);
+
+    // Otherwise block
+    return callback(new Error('CORS policy: origin not allowed'), false);
+  },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
