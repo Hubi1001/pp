@@ -137,30 +137,58 @@ function App() {
     // @ts-ignore: import.meta may not be typed in some TS configs, cast to any
     const API_BASE = ((import.meta as any)?.env?.VITE_API_BASE as string) || "";
 
-    // Określ endpoint na podstawie konfiguracji (MongoDB endpoint)
-    const endpoint = `${API_BASE}/api/mongodb/save`;
-
     try {
-
-      // Określ nazwę kolekcji na podstawie szablonu
-      let collectionName = "form_submissions";
+      // Określ endpoint na podstawie szablonu (SQLite endpoints)
+      let endpoint = "";
+      let payload: any = {};
 
       if (selectedTemplate === "experiment") {
-        collectionName = "experiments";
+        endpoint = `${API_BASE}/api/experiments`;
+        payload = {
+          project_id: formData.project_id || "",
+          name: formData.name || "",
+          author_id: formData.author_id || null,
+          form_id: formData.form_id || "",
+          description: formData.description || "",
+          details: formData.details || "",
+          status: formData.status || "new",
+        };
       } else if (selectedTemplate === "experimentExtended") {
-        collectionName = "experiments_extended";
+        endpoint = `${API_BASE}/api/experiments/extended`;
+        payload = {
+          project_id: formData.project_id || "",
+          name: formData.name || "",
+          author_id: formData.author_id || null,
+          form_id: formData.form_id || "",
+          description: formData.description || "",
+          details: formData.details || "",
+          status: formData.status || "new",
+          start_date: formData.start_date || null,
+          end_date: formData.end_date || null,
+          priority: formData.priority || null,
+          budget: formData.budget || null,
+          team_members: formData.team_members || null,
+          tags: formData.tags || null,
+          is_confidential: formData.is_confidential || false,
+          laboratory: formData.laboratory || null,
+        };
       } else if (selectedTemplate === "person") {
-        collectionName = "persons";
-      }
-
-      const payload = {
-        collection: collectionName,
-        data: {
+        endpoint = `${API_BASE}/api/persons`;
+        payload = {
+          firstName: formData.firstName || "",
+          lastName: formData.lastName || "",
+          age: formData.age || null,
+          email: formData.email || null,
+        };
+      } else {
+        // Dla innych formularzy użyj uniwersalnego endpointu
+        endpoint = `${API_BASE}/api/forms/submit`;
+        payload = {
           formType: selectedTemplate,
-          ...formData,
+          data: formData,
           schema: currentConfig.schema,
-        },
-      };
+        };
+      }
 
       const response = await fetch(endpoint, {
         method: "POST",
@@ -188,7 +216,7 @@ function App() {
       const errMsg = error && error.message ? error.message : String(error);
       setSaveMessage({
         type: "error",
-        text: `❌ Nie można połączyć się z serwerem pod adresem ${endpoint}. Szczegóły: ${errMsg}`,
+        text: `❌ Nie można połączyć się z serwerem. Szczegóły: ${errMsg}`,
       });
     } finally {
       setIsSaving(false);
