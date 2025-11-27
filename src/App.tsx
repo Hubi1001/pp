@@ -64,6 +64,11 @@ function App() {
   // Błędy parsowania
   const [parseError, setParseError] = useState<string>("");
 
+  // Kreator pól dla szablonu custom
+  const [newFieldName, setNewFieldName] = useState<string>("");
+  const [newFieldType, setNewFieldType] = useState<string>("string");
+  const [newFieldWidget, setNewFieldWidget] = useState<string>("text");
+
   // Tryb widoku: 'editor' lub 'form'
   const [viewMode, setViewMode] = useState<"editor" | "form">("editor");
 
@@ -90,8 +95,13 @@ function App() {
       const parsedSchema = JSON.parse(schemaInput);
       const parsedUiSchema = JSON.parse(uiSchemaInput);
       
+      // Debug: log schema to console
+      console.log('handleApplySchema - parsedSchema:', parsedSchema);
+      console.log('handleApplySchema - parsedUiSchema:', parsedUiSchema);
+      
       // Zainicjuj dane początkowe
       const initialData = generateInitialData(parsedSchema);
+      console.log('handleApplySchema - initialData:', initialData);
       
       setCurrentConfig({
         schema: parsedSchema,
@@ -105,6 +115,114 @@ function App() {
       setParseError(`Błąd parsowania JSON: ${error instanceof Error ? error.message : String(error)}`);
     }
   };
+
+  const removeCustomField = (fieldName: string) => {
+    setParseError("");
+    try {
+      const parsedSchema = JSON.parse(schemaInput);
+      const parsedUiSchema = JSON.parse(uiSchemaInput);
+
+      if (parsedSchema.properties && parsedSchema.properties[fieldName]) {
+        delete parsedSchema.properties[fieldName];
+      }
+
+      // Usuń kontrolkę z uischema
+      if (parsedUiSchema.elements && Array.isArray(parsedUiSchema.elements)) {
+        parsedUiSchema.elements = parsedUiSchema.elements.filter((el: any) => el.scope !== `#/properties/${fieldName}`);
+      }
+
+      // Zaktualizuj dane formularza
+      const newData = { ...(currentConfig.data || {}) };
+      delete newData[fieldName];
+
+      setSchemaInput(JSON.stringify(parsedSchema, null, 2));
+      setUiSchemaInput(JSON.stringify(parsedUiSchema, null, 2));
+      setFormData(newData);
+      setCurrentConfig({ schema: parsedSchema, uischema: parsedUiSchema, data: newData });
+    } catch (err) {
+      setParseError('Błąd podczas usuwania pola: ' + (err instanceof Error ? err.message : String(err)));
+    }
+  };
+
+    const addCustomField = () => {
+      setParseError("");
+      if (!newFieldName.match(/^[a-zA-Z_][a-zA-Z0-9_]*$/)) {
+        setParseError('Nazwa pola musi zaczynać się od litery lub podkreślenia i zawierać tylko znaki alfanumeryczne oraz _');
+        return;
+      }
+
+      try {
+        const parsedSchema = JSON.parse(schemaInput);
+        const parsedUiSchema = JSON.parse(uiSchemaInput);
+
+        if (!parsedSchema.properties) parsedSchema.properties = {};
+
+        // Dodaj właściwość z mapowaniem widgetów
+        let defaultValue: any = null;
+        const prop: any = {};
+
+        if (newFieldType === 'string') {
+          prop.type = 'string';
+          defaultValue = '';
+        } else if (newFieldType === 'number') {
+          prop.type = 'number';
+          defaultValue = null;
+        } else if (newFieldType === 'integer') {
+          prop.type = 'integer';
+          defaultValue = null;
+        } else if (newFieldType === 'boolean') {
+          prop.type = 'boolean';
+          defaultValue = false;
+        } else if (newFieldType === 'object') {
+          prop.type = 'object';
+          prop.properties = {};
+          defaultValue = {};
+        } else {
+          prop.type = 'string';
+          defaultValue = '';
+        }
+
+        // Dostosuj właściwość wg wybranego widgetu
+        if (newFieldWidget === 'date') {
+          // JSON Schema: użyj string + format: date
+          prop.type = 'string';
+          prop.format = 'date';
+        } else if (newFieldWidget === 'textarea') {
+          // zostaw string, UI-schema ustawi textarea
+          prop.type = prop.type || 'string';
+        } else if (newFieldWidget === 'checkbox') {
+          prop.type = 'boolean';
+        }
+
+        parsedSchema.properties[newFieldName] = prop;
+
+        // Zaktualizuj uischema (dodaj kontrolkę na końcu)
+        if (!parsedUiSchema.elements) parsedUiSchema.elements = [];
+        const control: any = {
+          type: 'Control',
+          scope: `#/properties/${newFieldName}`,
+        };
+        if (newFieldWidget === 'textarea') control.options = { multi: true };
+        if (newFieldWidget === 'date') control.options = { format: 'date' };
+        parsedUiSchema.elements.push(control);
+
+        // Zaktualizuj formData (weź obecną konfigurację jako źródło)
+        const currentData = { ...(currentConfig.data || {}) };
+        currentData[newFieldName] = defaultValue;
+
+        setSchemaInput(JSON.stringify(parsedSchema, null, 2));
+        setUiSchemaInput(JSON.stringify(parsedUiSchema, null, 2));
+        setFormData(currentData);
+        setCurrentConfig({ schema: parsedSchema, uischema: parsedUiSchema, data: currentData });
+
+        // Wyczyść pola kreatora
+        setNewFieldName('');
+        setNewFieldType('string');
+        setNewFieldWidget('text');
+      } catch (err) {
+        setParseError('Błąd podczas dodawania pola: ' + (err instanceof Error ? err.message : String(err)));
+      }
+    };
 
   const generateInitialData = (schema: any): any => {
     if (!schema || !schema.properties) return {};
@@ -312,6 +430,58 @@ function App() {
           
           <div style={{ marginBottom: "1rem" }}>
             <h3>JSON Schema</h3>
+            {selectedTemplate === 'custom' && (
+              <div style={{ marginBottom: '0.75rem', padding: '0.75rem', background: '#fffde7', borderRadius: 6 }}>
+                <strong>Dodaj pole (custom):</strong>
+                <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.5rem', alignItems: 'center' }}>
+                  <input
+                    value={newFieldName}
+                    onChange={(e) => setNewFieldName(e.target.value)}
+                    placeholder="nazwa pola"
+                    style={{ padding: '0.4rem', borderRadius: 4, border: '1px solid #ccc' }}
+                  />
+                  <select value={newFieldType} onChange={(e) => setNewFieldType(e.target.value)} style={{ padding: '0.4rem', borderRadius: 4 }}>
+                    <option value="string">string</option>
+                    <option value="number">number</option>
+                    <option value="integer">integer</option>
+                    <option value="boolean">boolean</option>
+                    <option value="object">object</option>
+                  </select>
+                  <select value={newFieldWidget} onChange={(e) => setNewFieldWidget(e.target.value)} style={{ padding: '0.4rem', borderRadius: 4 }}>
+                    <option value="text">Text</option>
+                    <option value="textarea">Textarea</option>
+                    <option value="date">Date</option>
+                    <option value="checkbox">Checkbox</option>
+                  </select>
+                  <button onClick={addCustomField} style={{ padding: '0.4rem 0.8rem', background: '#1976d2', color: 'white', border: 'none', borderRadius: 4 }}>Dodaj</button>
+                </div>
+                <div style={{ marginTop: '0.5rem', fontSize: '12px', color: '#666' }}>Po dodaniu pola możesz kliknąć "Wygeneruj formularz"</div>
+
+                {/* Lista aktualnych pól i możliwość usunięcia */}
+                <div style={{ marginTop: '0.75rem' }}>
+                  <strong>Aktualne pola:</strong>
+                  <div style={{ marginTop: '0.5rem', display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                    {(() => {
+                      try {
+                        const parsed = JSON.parse(schemaInput);
+                        const keys = parsed.properties ? Object.keys(parsed.properties) : [];
+                        if (keys.length === 0) return <div style={{ color: '#666' }}>Brak pól</div>;
+                        return keys.map((k: string) => (
+                          <div key={k} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#fff', padding: '0.4rem', borderRadius: 4, border: '1px solid #eee' }}>
+                            <div style={{ fontSize: '14px' }}>{k}</div>
+                            <div>
+                              <button onClick={() => removeCustomField(k)} style={{ padding: '0.3rem 0.6rem', background: '#e53935', color: 'white', border: 'none', borderRadius: 4 }}>Usuń</button>
+                            </div>
+                          </div>
+                        ));
+                      } catch (e) {
+                        return <div style={{ color: '#c62828' }}>Błąd odczytu pól</div>;
+                      }
+                    })()}
+                  </div>
+                </div>
+              </div>
+            )}
             <textarea
               value={schemaInput}
               onChange={(e) => setSchemaInput(e.target.value)}
