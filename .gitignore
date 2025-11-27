@@ -47,3 +47,5 @@ logs/
 # PostgreSQL
 *.sql.backup
 *.dump
+node_modules
+node_modules

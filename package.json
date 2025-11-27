@@ -29,6 +29,7 @@
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "sql.js": "^1.13.0",
+    "sqlite3": "^5.1.7",
     "styled-components": "latest",
     "yup": "latest"
   },
