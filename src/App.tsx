@@ -198,9 +198,22 @@ function App() {
         body: JSON.stringify(payload),
       });
 
-      const result = await response.json();
+      // Bezpiecznie spróbuj odczytać odpowiedź — nie zakładaj, że zawsze jest JSON
+      const text = await response.text();
+      let result: any = null;
 
-      if (response.ok && result.success) {
+      if (text) {
+        try {
+          result = JSON.parse(text);
+        } catch (err) {
+          // Jeśli odpowiedź nie jest poprawnym JSON, zachowaj surowy tekst
+          result = { success: false, message: text };
+        }
+      } else {
+        result = { success: response.ok, message: response.statusText || "Brak treści odpowiedzi" };
+      }
+
+      if (response.ok && result && result.success) {
         setSaveMessage({
           type: "success",
           text: `✅ ${result.message || "Dane zostały zapisane do bazy danych"}`,
@@ -208,7 +221,7 @@ function App() {
       } else {
         setSaveMessage({
           type: "error",
-          text: `❌ ${result.message || "Błąd zapisu do bazy danych"}`,
+          text: `❌ ${result && result.message ? result.message : "Błąd zapisu do bazy danych"}`,
         });
       }
     } catch (error: any) {

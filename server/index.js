@@ -141,14 +141,20 @@ app.post('/api/experiments', async (req, res) => {
     );
 
     // Pobierz zapisany rekord
-    const inserted = query('SELECT * FROM eksperymenty WHERE id = ?', [result.insertId]);
+    let inserted;
+    if (result && result.insertId) {
+      inserted = query('SELECT * FROM eksperymenty WHERE id = ?', [result.insertId]);
+    } else {
+      // Fallback: pobierz ostatnio wstawiony rekord
+      inserted = query('SELECT * FROM eksperymenty ORDER BY id DESC LIMIT 1');
+    }
 
     console.log('✅ Eksperyment zapisany:', inserted.rows[0]);
 
     res.status(201).json({
       success: true,
       message: 'Eksperyment został zapisany',
-      data: inserted.rows[0],
+      data: inserted.rows[0] || null,
     });
   } catch (error) {
     console.error('❌ Błąd zapisu eksperymentu:', error);
@@ -205,12 +211,17 @@ app.post('/api/experiments/extended', async (req, res) => {
       ]
     );
 
-    const inserted = query('SELECT * FROM eksperymenty_extended WHERE id = ?', [result.insertId]);
+    let inserted;
+    if (result && result.insertId) {
+      inserted = query('SELECT * FROM eksperymenty_extended WHERE id = ?', [result.insertId]);
+    } else {
+      inserted = query('SELECT * FROM eksperymenty_extended ORDER BY id DESC LIMIT 1');
+    }
 
     res.status(201).json({
       success: true,
       message: 'Eksperyment rozszerzony został zapisany',
-      data: inserted.rows[0],
+      data: inserted.rows[0] || null,
     });
   } catch (error) {
     console.error('Błąd zapisu eksperymentu rozszerzonego:', error);
@@ -233,12 +244,17 @@ app.post('/api/persons', async (req, res) => {
       [firstName, lastName, age || null, email || null]
     );
 
-    const inserted = query('SELECT * FROM osoby WHERE id = ?', [result.insertId]);
+    let inserted;
+    if (result && result.insertId) {
+      inserted = query('SELECT * FROM osoby WHERE id = ?', [result.insertId]);
+    } else {
+      inserted = query('SELECT * FROM osoby ORDER BY id DESC LIMIT 1');
+    }
 
     res.status(201).json({
       success: true,
       message: 'Osoba została zapisana',
-      data: inserted.rows[0],
+      data: inserted.rows[0] || null,
     });
   } catch (error) {
     console.error('Błąd zapisu osoby:', error);
@@ -268,12 +284,17 @@ app.post('/api/forms/submit', async (req, res) => {
       [formType, JSON.stringify(data), schema ? JSON.stringify(schema) : null]
     );
 
-    const inserted = query('SELECT * FROM form_submissions WHERE id = ?', [result.insertId]);
+    let inserted;
+    if (result && result.insertId) {
+      inserted = query('SELECT * FROM form_submissions WHERE id = ?', [result.insertId]);
+    } else {
+      inserted = query('SELECT * FROM form_submissions ORDER BY id DESC LIMIT 1');
+    }
 
     res.status(201).json({
       success: true,
       message: 'Formularz został zapisany',
-      data: inserted.rows[0],
+      data: inserted.rows[0] || null,
     });
   } catch (error) {
     console.error('Błąd zapisu formularza:', error);
